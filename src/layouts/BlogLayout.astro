@@ -1,0 +1,19 @@
+---
+import Layout from "./Layout.astro";
+
+interface Props {
+  title: string;
+}
+
+const { title } = Astro.props;
+---
+
+<Layout title={title}>
+  <header class="bg-blue-600 text-white text-center py-4">
+    <h1 class="text-3xl font-bold">
+      <a href="/blog" class="text-white"> Astro Blog </a>
+    </h1>
+  </header>
+
+  <slot />
+</Layout>
