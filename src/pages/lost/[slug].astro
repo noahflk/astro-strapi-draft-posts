@@ -1,26 +1,15 @@
 ---
 import { marked } from "marked";
 import BlogLayout from "../../layouts/BlogLayout.astro";
-import Discard from "../../components/Discard";
-import Visibility from "../../components/Visibility";
-
 const { slug } = Astro.params;
 
-const [publishedResponse, draftResponse] = await Promise.all([
-  fetch(
-    `${import.meta.env.STRAPI_URL}/api/posts?populate=header&filters[slug][$eq]=${slug}`
-  ),
-  fetch(
-    `${import.meta.env.STRAPI_URL}/api/posts?populate=header&filters[slug][$eq]=${slug}&status=draft`
-  ),
-]);
+const response = await fetch(
+  `${import.meta.env.STRAPI_URL}/api/posts?populate=header&filters[slug][$eq]=${slug}`
+);
 
-const [publishedData, draftData] = await Promise.all([
-  publishedResponse.json(),
-  draftResponse.json(),
-]);
+const data = await response.json();
 
-let post = publishedData.data[0] || draftData.data[0];
+let post = data.data[0];
 
 if (!post) {
   return new Response("Post not found", { status: 404 });
@@ -35,8 +24,6 @@ const publishDate = post.publishedAt
       day: "numeric",
     })
   : null;
-
-const isDraft = !publishDate;
 ---
 
 <BlogLayout title={post.title}>
@@ -52,17 +39,6 @@ const isDraft = !publishDate;
     }
     <div class="flex items-center justify-between mb-4">
       <h1 class="mb-0">{post.title}</h1>
-      {
-        isDraft && (
-          <p class="text-base font-semibold bg-yellow-100 text-yellow-800 px-3 py-1 rounded flex-shrink-0">
-            Draft
-          </p>
-        )
-      }
-    </div>
-    <div class="flex gap-2 mb-6">
-      <Visibility client:load postId={post.documentId} isDraft={isDraft} />
-      {isDraft && <Discard client:load postId={post.documentId} />}
     </div>
     {publishDate && <p class="text-gray-500 mt-2">{publishDate}</p>}
     <div set:html={marked.parse(post.content)} />
