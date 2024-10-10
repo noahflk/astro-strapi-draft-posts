@@ -1,4 +1,4 @@
-export default function Visibility({ postId, isDraft }) {
+export default function Visibility({ postId, isDraft, slug }) {
   const handleVisibilityChange = async () => {
     const action = isDraft ? 'publish' : 'unpublish';
     const secret = prompt(`Please enter the secret to ${action} this post:`);
@@ -27,8 +27,9 @@ export default function Visibility({ postId, isDraft }) {
 
       const data = await response.json();
       console.log(`Post ${action}ed successfully`, data);
-      // Reload the page to reflect the new state
-      window.location.reload();
+      // Redirect to the appropriate URL based on the new state
+      const newPath = isDraft ? `/blog/${slug}` : `/blog/draft/${slug}`;
+      window.location.href = newPath;
     } catch (error) {
       console.error(`Error ${action}ing post:`, error);
       alert(`Failed to ${action} post. Please try again.`);
